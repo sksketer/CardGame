@@ -1,0 +1,23 @@
+{
+  "name": "crad-game",
+  "version": "1.0.0",
+  "description": "Memory card game",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf ./public/dist",
+    "build": "node esbuild.config.js"
+  },
+  "author": "sksketer",
+  "license": "ISC",
+  "dependencies": {
+    "gsap": "^3.12.7",
+    "pixi.js": "^8.9.0"
+  },
+  "devDependencies": {
+    "@types/pixi.js": "^5.0.0",
+    "esbuild": "^0.25.1",
+    "esbuild-plugin-copy": "^2.1.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2"
+  }
+}
