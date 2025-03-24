@@ -44094,13 +44094,13 @@ ${e2}`);
     showCard(cardFront, cardBack) {
       this.flipCard(cardFront, cardBack);
     }
-    hideCard(cardFront, cardBack) {
-      this.flipCard(cardBack, cardFront);
+    hideCard(cardFront, cardBack, callback) {
+      this.flipCard(cardBack, cardFront, callback);
     }
-    flipCard(cardFront, cardBack) {
+    flipCard(cardFront, cardBack, callback) {
       const duration = 0.25;
       gsapWithCSS.to(cardBack.scale, { x: 0, duration, onComplete: () => {
-        gsapWithCSS.to(cardFront.scale, { x: 1, duration });
+        gsapWithCSS.to(cardFront.scale, { x: 1, duration, onComplete: callback });
       } });
     }
   };
@@ -44114,6 +44114,7 @@ ${e2}`);
       super();
       this._cards = [];
       this.cardsContainer = new Container();
+      this.cardsContainer.position.set(12);
       this.addChild(this.cardsContainer);
       this.winTextContainer = new Container();
       this.addChild(this.winTextContainer);
@@ -44131,8 +44132,8 @@ ${e2}`);
     placeCards() {
       this._cards.sort(() => Math.random() - 0.5);
       this._cards.forEach((card, index) => {
-        const xPos = (card.width + 10) * (index % 6);
-        const yPos = (card.height + 10) * Math.floor(index / 6);
+        const xPos = (card.width + 10) * (index % 5);
+        const yPos = (card.height + 10) * Math.floor(index / 5);
         card.position.set(xPos, yPos);
       });
     }
@@ -44174,8 +44175,8 @@ ${e2}`);
     createCards() {
       const totalCardCount = this.config.totalCard;
       for (let i2 = 0; i2 < totalCardCount; i2++) {
-        const card = this.view.createCards(`card_${i2}`, this.config.cardName[i2]);
-        const cloneCard = this.view.createCards(`cloneCard_${i2}`, this.config.cardName[i2]);
+        this.view.createCards(`card_${i2}`, this.config.cardName[i2]);
+        this.view.createCards(`cloneCard_${i2}`, this.config.cardName[i2]);
       }
     }
     bindHandler() {
@@ -44184,7 +44185,14 @@ ${e2}`);
         card.on("pointerdown", this.cardClicked.bind(this));
       });
     }
+    updateCardInteraction(interaction) {
+      const _cards = this.view.getCards();
+      _cards.forEach((card) => {
+        card.interactive = interaction;
+      });
+    }
     cardClicked(event) {
+      this.updateCardInteraction(false);
       const clickedCard = event.target;
       if (this.clickedCards?.length >= 2) {
         throw new Error("Already 2 cards are open");
@@ -44202,16 +44210,19 @@ ${e2}`);
           this.leftCardSetCount--;
           if (this.leftCardSetCount === 0) {
             this.view.showWinGame();
+            return;
           }
+          this.updateCardInteraction(true);
           return;
         }
         if (this.prevClickedCard) {
           clickedCard.hideCard(cardFront, cardBack);
-          this.prevClickedCard.hideCard(this.prevClickedCard.children[0], this.prevClickedCard.children[1]);
+          this.prevClickedCard.hideCard(this.prevClickedCard.children[0], this.prevClickedCard.children[1], this.updateCardInteraction.bind(this, true));
           this.prevClickedCard = void 0;
           this.clickedCards = [];
           return;
         }
+        this.updateCardInteraction(true);
         this.prevClickedCard = clickedCard;
         this.clickedCards.push(clickedCard);
       }, 1e3);
@@ -44236,8 +44247,8 @@ ${e2}`);
 
   // src/ts/GameConfig.ts
   var GameConfig = {
-    totalCard: 13,
-    cardName: ["A", "K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2"]
+    totalCard: 20,
+    cardName: ["A", "K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2", "a", "k", "q", "j", "1", "0", "*"]
   };
 
   // src/index.ts

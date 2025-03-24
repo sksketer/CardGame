@@ -23,8 +23,8 @@ export class GameController {
     private createCards(): void {
         const totalCardCount: number = this.config.totalCard;
         for (let i: number = 0; i < totalCardCount; i++) {
-            const card = this.view.createCards(`card_${i}`, this.config.cardName[i]);
-            const cloneCard = this.view.createCards(`cloneCard_${i}`, this.config.cardName[i]);
+            this.view.createCards(`card_${i}`, this.config.cardName[i]);
+            this.view.createCards(`cloneCard_${i}`, this.config.cardName[i]);
         }
     }
 
@@ -35,7 +35,15 @@ export class GameController {
         });
     }
 
+    private updateCardInteraction(interaction: boolean): void {
+        const _cards: Array<Card> = this.view.getCards();
+        _cards.forEach(card => {
+            card.interactive = interaction;
+        });
+    }
+
     private cardClicked(event: FederatedPointerEvent): void {
+        this.updateCardInteraction(false);
         const clickedCard: Card = event.target as Card;
         if (this.clickedCards?.length >= 2) {
             throw new Error("Already 2 cards are open");
@@ -58,20 +66,23 @@ export class GameController {
                 this.leftCardSetCount--;
                 if (this.leftCardSetCount === 0) {
                     this.view.showWinGame();
+                    return;
                 }
+                this.updateCardInteraction(true);
                 return;
             }
-
+            
             if (this.prevClickedCard) {
                 clickedCard.hideCard(cardFront, cardBack);
-                this.prevClickedCard.hideCard(this.prevClickedCard.children[0], this.prevClickedCard.children[1]);
+                this.prevClickedCard.hideCard(this.prevClickedCard.children[0], this.prevClickedCard.children[1], this.updateCardInteraction.bind(this, true));
                 // clickedCard.on("pointerdown", this.cardClicked.bind(this, clickedCard));
                 // this.prevClickedCard.on("pointerdown", this.cardClicked.bind(this, this.prevClickedCard));
                 this.prevClickedCard = undefined;
                 this.clickedCards = [];
                 return;
             }
-
+            
+            this.updateCardInteraction(true);
             this.prevClickedCard = clickedCard;
             this.clickedCards.push(clickedCard);
         }, 1000);

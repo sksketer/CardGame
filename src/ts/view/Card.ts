@@ -66,14 +66,14 @@ export class Card extends Container{
         this.flipCard(cardFront, cardBack);
     }
     
-    public hideCard(cardFront: Container, cardBack: Container): void {
-        this.flipCard(cardBack, cardFront);
+    public hideCard(cardFront: Container, cardBack: Container, callback?: () => void): void {
+        this.flipCard(cardBack, cardFront, callback);
     }
 
-    private flipCard(cardFront: Container, cardBack: Container): void {
+    private flipCard(cardFront: Container, cardBack: Container, callback?: () => void): void {
         const duration: number = 0.25;
         gsap.to(cardBack.scale, { x: 0, duration, onComplete: () => {
-            gsap.to(cardFront.scale, { x:1, duration })
+            gsap.to(cardFront.scale, { x:1, duration, onComplete: callback })
         } });
     }
 }

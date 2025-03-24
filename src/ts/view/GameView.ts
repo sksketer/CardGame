@@ -11,6 +11,7 @@ export class GameView extends Container {
         super();
         this._cards = [];
         this.cardsContainer = new Container();
+        this.cardsContainer.position.set(12);
         this.addChild(this.cardsContainer);
         this.winTextContainer = new Container();
         this.addChild(this.winTextContainer);
@@ -31,8 +32,8 @@ export class GameView extends Container {
     public placeCards(): void {
         this._cards.sort(() => Math.random() - 0.5);
         this._cards.forEach((card: Card, index: number) => {
-            const xPos: number = (card.width + 10) * (index % 6);
-            const yPos: number = (card.height + 10) * (Math.floor(index / 6));
+            const xPos: number = (card.width + 10) * (index % 5);
+            const yPos: number = (card.height + 10) * (Math.floor(index / 5));
             card.position.set(xPos, yPos);
         });
     }
