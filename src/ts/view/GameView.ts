@@ -22,6 +22,12 @@ export class GameView extends Container {
     public getCards(): Array<Card> {
         return this._cards;
     }
+
+    public removeWinningCards(winningCards: Array<Card>): void {
+        winningCards.forEach(card => {
+            this._cards = this._cards.filter(_card => _card !== card);
+        });
+    }
     
     public createCards(id: string, text: string): void {
         const card = new Card(id, text);

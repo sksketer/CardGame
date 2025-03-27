@@ -40,6 +40,7 @@ export class GameController {
         _cards.forEach(card => {
             card.interactive = interaction;
         });
+        interaction && this.prevClickedCard && ((this.prevClickedCard as Card).interactive = false);
     }
 
     private cardClicked(event: FederatedPointerEvent): void {
@@ -49,8 +50,6 @@ export class GameController {
             throw new Error("Already 2 cards are open");
         }
 
-        // clickedCard.off("pointerdown", this.cardClicked.bind(this, clickedCard));
-
         const cardFront: Container = clickedCard.children[0];
         const cardBack: Container = clickedCard.children[1];
 
@@ -59,6 +58,7 @@ export class GameController {
         setTimeout(() => {
             if (this.prevClickedCard?._id === clickedCard._id) {
                 console.log("Match found");
+                this.view.removeWinningCards([clickedCard, this.prevClickedCard]);
                 this.prevClickedCard.alpha = 0.2;
                 clickedCard.alpha = 0.2;
                 this.prevClickedCard = undefined;
@@ -75,16 +75,14 @@ export class GameController {
             if (this.prevClickedCard) {
                 clickedCard.hideCard(cardFront, cardBack);
                 this.prevClickedCard.hideCard(this.prevClickedCard.children[0], this.prevClickedCard.children[1], this.updateCardInteraction.bind(this, true));
-                // clickedCard.on("pointerdown", this.cardClicked.bind(this, clickedCard));
-                // this.prevClickedCard.on("pointerdown", this.cardClicked.bind(this, this.prevClickedCard));
                 this.prevClickedCard = undefined;
                 this.clickedCards = [];
                 return;
             }
             
-            this.updateCardInteraction(true);
             this.prevClickedCard = clickedCard;
             this.clickedCards.push(clickedCard);
+            this.updateCardInteraction(true);
         }, 1000);
     }
 }
