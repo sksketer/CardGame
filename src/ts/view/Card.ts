@@ -62,8 +62,8 @@ export class Card extends Container{
         return container;
     }
 
-    public showCard(cardFront: Container, cardBack: Container): void {
-        this.flipCard(cardFront, cardBack);
+    public showCard(cardFront: Container, cardBack: Container, callback?: () => void): void {
+        this.flipCard(cardFront, cardBack, callback);
     }
     
     public hideCard(cardFront: Container, cardBack: Container, callback?: () => void): void {

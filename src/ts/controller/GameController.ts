@@ -53,14 +53,12 @@ export class GameController {
         const cardFront: Container = clickedCard.children[0];
         const cardBack: Container = clickedCard.children[1];
 
-        clickedCard.showCard(cardFront, cardBack);
-
-        setTimeout(() => {
+        clickedCard.showCard(cardFront, cardBack, () => {
             if (this.prevClickedCard?._id === clickedCard._id) {
                 console.log("Match found");
                 this.view.removeWinningCards([clickedCard, this.prevClickedCard]);
-                this.prevClickedCard.alpha = 0.2;
-                clickedCard.alpha = 0.2;
+                this.prevClickedCard.alpha = 0.5;
+                clickedCard.alpha = 0.5;
                 this.prevClickedCard = undefined;
                 this.clickedCards = [];
                 this.leftCardSetCount--;
@@ -71,7 +69,7 @@ export class GameController {
                 this.updateCardInteraction(true);
                 return;
             }
-            
+
             if (this.prevClickedCard) {
                 clickedCard.hideCard(cardFront, cardBack);
                 this.prevClickedCard.hideCard(this.prevClickedCard.children[0], this.prevClickedCard.children[1], this.updateCardInteraction.bind(this, true));
@@ -79,10 +77,12 @@ export class GameController {
                 this.clickedCards = [];
                 return;
             }
-            
+
             this.prevClickedCard = clickedCard;
             this.clickedCards.push(clickedCard);
             this.updateCardInteraction(true);
-        }, 1000);
+        });
+
+
     }
 }
