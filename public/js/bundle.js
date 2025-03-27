@@ -44091,8 +44091,8 @@ ${e2}`);
       container.scale.x = 0;
       return container;
     }
-    showCard(cardFront, cardBack) {
-      this.flipCard(cardFront, cardBack);
+    showCard(cardFront, cardBack, callback) {
+      this.flipCard(cardFront, cardBack, callback);
     }
     hideCard(cardFront, cardBack, callback) {
       this.flipCard(cardBack, cardFront, callback);
@@ -44108,21 +44108,59 @@ ${e2}`);
   // src/ts/view/GameView.ts
   var GameView = class extends Container {
     _cards;
+    gameDataContainer;
     cardsContainer;
     winTextContainer;
     constructor() {
       super();
       this._cards = [];
+      this.gameDataContainer = new Container();
+      this.gameDataContainer.position.set(12, 0);
+      this.addChild(this.gameDataContainer);
       this.cardsContainer = new Container();
-      this.cardsContainer.position.set(12);
+      this.cardsContainer.position.set(12, 30);
       this.addChild(this.cardsContainer);
       this.winTextContainer = new Container();
       this.addChild(this.winTextContainer);
       this.onResize();
       addEventListener("resize", this.onResize.bind(this));
     }
+    createGameDataUI(totalCards) {
+      const style = new TextStyle({
+        fontFamily: "Arial",
+        fontSize: 18,
+        fontStyle: "normal",
+        fontWeight: "normal",
+        // fill: new FillGradient(0, 0, 0, 10),
+        stroke: { color: "#ff0000", width: 3, join: "round" }
+      });
+      const totalcardDataContainer = new Container();
+      const totalCardText = new Text({ text: "Total Card Set: ", style });
+      const totalCardCount = new Text({ text: totalCards, style });
+      totalCardCount.position.set(125, 0);
+      const totalMoveDataContainer = new Container();
+      const moveCountText = new Text({ text: "Total Moves: ", style });
+      const moveCountCount = new Text({ text: " ", style });
+      moveCountCount.position.set(105, 0);
+      totalMoveDataContainer.position.set(265, 0);
+      totalcardDataContainer.addChild(totalCardText);
+      totalcardDataContainer.addChild(totalCardCount);
+      totalMoveDataContainer.addChild(moveCountText);
+      totalMoveDataContainer.addChild(moveCountCount);
+      this.gameDataContainer.addChild(totalcardDataContainer);
+      this.gameDataContainer.addChild(totalMoveDataContainer);
+    }
+    updateMoveCount(count2) {
+      const moveCountText = this.gameDataContainer.children[1].children[1];
+      moveCountText.text = count2;
+    }
     getCards() {
       return this._cards;
+    }
+    removeWinningCards(winningCards) {
+      winningCards.forEach((card) => {
+        this._cards = this._cards.filter((_card) => _card !== card);
+      });
     }
     createCards(id, text) {
       const card = new Card(id, text);
@@ -44138,7 +44176,7 @@ ${e2}`);
       });
     }
     showWinGame() {
-      const winGametext = new Text({ text: "Congratulation! YOU WIN", style: new TextStyle({
+      const winGametext = new Text({ text: `Congratulation! YOU WIN`, style: new TextStyle({
         fontFamily: "Arial",
         fontSize: 36,
         fontStyle: "normal",
@@ -44163,14 +44201,18 @@ ${e2}`);
     prevClickedCard;
     clickedCards;
     leftCardSetCount;
+    moveCount;
     constructor(view, config3) {
       this.view = view;
       this.config = { ...config3 };
       this.clickedCards = [];
+      this.moveCount = 0;
       this.leftCardSetCount = this.config.totalCard;
+      this.view.createGameDataUI(this.leftCardSetCount);
       this.createCards();
       this.bindHandler();
       this.view.placeCards();
+      this.view.x = (window.app.canvas.width - this.view.width) / 2;
     }
     createCards() {
       const totalCardCount = this.config.totalCard;
@@ -44190,6 +44232,7 @@ ${e2}`);
       _cards.forEach((card) => {
         card.interactive = interaction;
       });
+      interaction && this.prevClickedCard && (this.prevClickedCard.interactive = false);
     }
     cardClicked(event) {
       this.updateCardInteraction(false);
@@ -44199,12 +44242,13 @@ ${e2}`);
       }
       const cardFront = clickedCard.children[0];
       const cardBack = clickedCard.children[1];
-      clickedCard.showCard(cardFront, cardBack);
-      setTimeout(() => {
+      clickedCard.showCard(cardFront, cardBack, () => {
+        this.prevClickedCard && this.view.updateMoveCount(++this.moveCount);
         if (this.prevClickedCard?._id === clickedCard._id) {
           console.log("Match found");
-          this.prevClickedCard.alpha = 0.2;
-          clickedCard.alpha = 0.2;
+          this.view.removeWinningCards([clickedCard, this.prevClickedCard]);
+          this.prevClickedCard.alpha = 0.5;
+          clickedCard.alpha = 0.5;
           this.prevClickedCard = void 0;
           this.clickedCards = [];
           this.leftCardSetCount--;
@@ -44222,10 +44266,10 @@ ${e2}`);
           this.clickedCards = [];
           return;
         }
-        this.updateCardInteraction(true);
         this.prevClickedCard = clickedCard;
         this.clickedCards.push(clickedCard);
-      }, 1e3);
+        this.updateCardInteraction(true);
+      });
     }
   };
 
@@ -44247,7 +44291,7 @@ ${e2}`);
 
   // src/ts/GameConfig.ts
   var GameConfig = {
-    totalCard: 20,
+    totalCard: 15,
     cardName: ["A", "K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2", "a", "k", "q", "j", "1", "0", "*"]
   };
 

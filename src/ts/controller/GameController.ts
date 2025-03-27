@@ -9,15 +9,19 @@ export class GameController {
     private prevClickedCard: Card | undefined;
     private clickedCards: Array<Card>;
     private leftCardSetCount: number;
+    private moveCount: number;
 
     constructor(view: GameView, config: IGameConfig) {
         this.view = view;
         this.config = { ...config };
         this.clickedCards = [];
+        this.moveCount = 0;
         this.leftCardSetCount = this.config.totalCard;
+        this.view.createGameDataUI(this.leftCardSetCount);
         this.createCards();
         this.bindHandler();
         this.view.placeCards();
+        this.view.x = ((window as any).app.canvas.width - this.view.width) / 2;
     }
 
     private createCards(): void {
@@ -54,6 +58,7 @@ export class GameController {
         const cardBack: Container = clickedCard.children[1];
 
         clickedCard.showCard(cardFront, cardBack, () => {
+            this.prevClickedCard && this.view.updateMoveCount(++this.moveCount);
             if (this.prevClickedCard?._id === clickedCard._id) {
                 console.log("Match found");
                 this.view.removeWinningCards([clickedCard, this.prevClickedCard]);
